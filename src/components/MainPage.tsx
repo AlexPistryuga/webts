@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import {
   Box,
   Typography,
@@ -9,6 +9,7 @@ import {
   styled,
 } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
+import { fetchUserEspDevices } from '../graphql/query/fetchUserEspDevices.query';
 
 const NavBar = styled(Box)(({ theme }) => ({
   width: '200px',
@@ -68,7 +69,20 @@ const PageWrapper = styled(Box)({
   width: '100%',
 });
 
+
 export default function MainPage() {
+  
+  const retrieveUserEspDevices = async () => {
+    const result = await fetchUserEspDevices("artur")
+    console.log(result)
+  } 
+
+  useEffect(() => {
+    retrieveUserEspDevices()
+    //fetchEspDevices().then((response) => console.log(response))
+    console.log('privet')
+  }, [])
+
   return (
     <PageWrapper>
       <ProfileSection>

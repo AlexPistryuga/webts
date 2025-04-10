@@ -2,8 +2,26 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import LoginPage from './components/LoginPage';
 import MainPage from './components/MainPage';
 import './App.css';
+// import { useEffect } from 'react';
+// import { fetchEspDevices } from './graphql/query/fetchEspDevices.query';
 
 function App() {
+
+  /*
+  const retrieveEspDevices = async () => {
+    const result = await fetchEspDevices()
+    console.log(result)
+  } 
+
+  useEffect(() => {
+    retrieveEspDevices()
+    //fetchEspDevices().then((response) => console.log(response))
+    console.log('privet')
+  }, [])
+  */
+
+  
+
   return (
     <Router>
       <Routes>

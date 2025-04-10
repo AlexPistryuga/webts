@@ -7,7 +7,8 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "genserver": "gql.tada generate schema 'http://localhost:8080/v1/graphql' -o ./generated/tada/schema/server.graphql && gql-tada generate output"
   },
   "dependencies": {
     "@emotion/react": "^11.14.0",
@@ -15,12 +16,15 @@
     "@mui/icons-material": "^7.0.1",
     "@mui/material": "^7.0.1",
     "@types/react-router-dom": "^5.3.3",
+    "@urql/core": "^5.1.1",
+    "gql.tada": "^1.8.10",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-router-dom": "^7.5.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.21.0",
+    "@types/node": "^22.14.0",
     "@types/react": "^19.0.10",
     "@types/react-dom": "^19.0.4",
     "@vitejs/plugin-react": "^4.3.4",
