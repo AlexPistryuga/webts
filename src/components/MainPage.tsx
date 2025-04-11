@@ -10,6 +10,7 @@ import {
 } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import { fetchUserEspDevices } from '../graphql/query/fetchUserEspDevices.query';
+import DeviceManager from './DeviceManager';
 
 const NavBar = styled(Box)(({ theme }) => ({
   width: '200px',
@@ -98,18 +99,7 @@ export default function MainPage() {
       </NavBar>
 
       <MainContent>
-        <DeviceBox elevation={3}>
-          <Typography variant="h6" sx={{ mb: 2 }}>
-            Устройств пока нет
-          </Typography>
-          <Button
-            variant="contained"
-            startIcon={<AddIcon />}
-            sx={{ mt: 2 }}
-          >
-            Добавить новое
-          </Button>
-        </DeviceBox>
+        <DeviceManager />
       </MainContent>
     </PageWrapper>
   );

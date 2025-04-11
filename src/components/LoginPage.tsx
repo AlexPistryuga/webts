@@ -10,18 +10,13 @@ import {
   Paper,
   Link,
 } from '@mui/material';
-import { styled } from '@mui/material/styles';
+import { StyledPaper, styles } from '../styles/LoginPageStyles';
 
 interface TabPanelProps {
   children?: React.ReactNode;
   index: number;
   value: number;
 }
-
-const StyledPaper = styled(Paper)(({ theme }) => ({
-  padding: theme.spacing(3),
-  marginTop: theme.spacing(8),
-}));
 
 function TabPanel(props: TabPanelProps) {
   const { children, value, index, ...other } = props;
@@ -68,9 +63,9 @@ export default function LoginPage() {
   };
 
   return (
-    <Container component="main" maxWidth="sm">
+    <Container component="main" maxWidth={styles.container.maxWidth}>
       <StyledPaper elevation={3}>
-        <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
+        <Box sx={styles.tabs}>
           <Tabs value={tabValue} onChange={handleTabChange} centered>
             <Tab label="Вход" />
             <Tab label="Регистрация" />
@@ -100,7 +95,7 @@ export default function LoginPage() {
               type="submit"
               fullWidth
               variant="contained"
-              sx={{ mt: 3, mb: 2 }}
+              sx={styles.formButton}
             >
               Войти
             </Button>
@@ -139,7 +134,7 @@ export default function LoginPage() {
               type="submit"
               fullWidth
               variant="contained"
-              sx={{ mt: 3, mb: 2 }}
+              sx={styles.formButton}
             >
               Зарегистрироваться
             </Button>
