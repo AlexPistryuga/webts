@@ -5,17 +5,20 @@ import {
   Tabs,
   TextField,
   Button,
-  Typography,
   Container,
   Paper,
-  Link,
 } from '@mui/material';
 import { styled } from '@mui/material/styles';
+import { useNavigate } from 'react-router-dom';
 
 interface TabPanelProps {
   children?: React.ReactNode;
   index: number;
   value: number;
+}
+
+interface LoginPageProps {
+  onLogin: () => void;
 }
 
 const StyledPaper = styled(Paper)(({ theme }) => ({
@@ -39,32 +42,74 @@ function TabPanel(props: TabPanelProps) {
   );
 }
 
-export default function LoginPage() {
+export default function LoginPage({ onLogin }: LoginPageProps) {
   const [tabValue, setTabValue] = useState(0);
-  const [loginData, setLoginData] = useState({
-    username: '',
-    password: '',
-  });
+  const [loginData, setLoginData] = useState({ username: '', password: '' });
   const [registerData, setRegisterData] = useState({
     username: '',
     password: '',
     confirmPassword: '',
   });
 
-  const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
+  const navigate = useNavigate();
+
+  const handleTabChange = (_event: React.SyntheticEvent, newValue: number) => {
     setTabValue(newValue);
   };
 
-  const handleLogin = (event: React.FormEvent) => {
+  const handleLogin = async (event: React.FormEvent) => {
     event.preventDefault();
-    // Здесь будет логика входа
-    console.log('Login data:', loginData);
+
+    try {
+      const response = await fetch('http://localhost:8096/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ...loginData, username:loginData.username.trim() }),
+      });
+
+      if (!response.ok) throw new Error('Login failed');
+
+      const data = await response.json();
+      console.log('Login successful', data);
+
+      localStorage.setItem('authorized', 'true');
+      onLogin(); // Notify App to update routing
+      navigate('/main');
+    } catch (error) {
+      console.error('Error logging in:', error);
+      alert('Ошибка входа: проверьте логин и пароль');
+    }
   };
 
-  const handleRegister = (event: React.FormEvent) => {
+  const handleRegister = async (event: React.FormEvent) => {
     event.preventDefault();
-    // Здесь будет логика регистрации
-    console.log('Register data:', registerData);
+
+    if (registerData.password !== registerData.confirmPassword) {
+      alert("Пароли не совпадают!");
+      return;
+    }
+
+    try {
+      const response = await fetch('http://localhost:8096/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          username: registerData.username,
+          password: registerData.password,
+        }),
+      });
+
+      if (!response.ok) throw new Error('Registration failed');
+
+      const data = await response.json();
+      console.log('Registration successful', data);
+
+      setTabValue(0); // Switch to login tab
+      setRegisterData({ username: '', password: '', confirmPassword: '' });
+    } catch (error) {
+      console.error('Error registering:', error);
+      alert('Ошибка регистрации. Попробуйте другое имя пользователя.');
+    }
   };
 
   return (
@@ -85,7 +130,9 @@ export default function LoginPage() {
               fullWidth
               label="Имя пользователя"
               value={loginData.username}
-              onChange={(e) => setLoginData({ ...loginData, username: e.target.value })}
+              onChange={(e) =>
+                setLoginData({ ...loginData, username: e.target.value })
+              }
             />
             <TextField
               margin="normal"
@@ -94,7 +141,9 @@ export default function LoginPage() {
               label="Пароль"
               type="password"
               value={loginData.password}
-              onChange={(e) => setLoginData({ ...loginData, password: e.target.value })}
+              onChange={(e) =>
+                setLoginData({ ...loginData, password: e.target.value })
+              }
             />
             <Button
               type="submit"
@@ -115,7 +164,9 @@ export default function LoginPage() {
               fullWidth
               label="Имя пользователя"
               value={registerData.username}
-              onChange={(e) => setRegisterData({ ...registerData, username: e.target.value })}
+              onChange={(e) =>
+                setRegisterData({ ...registerData, username: e.target.value })
+              }
             />
             <TextField
               margin="normal"
@@ -124,7 +175,9 @@ export default function LoginPage() {
               label="Пароль"
               type="password"
               value={registerData.password}
-              onChange={(e) => setRegisterData({ ...registerData, password: e.target.value })}
+              onChange={(e) =>
+                setRegisterData({ ...registerData, password: e.target.value })
+              }
             />
             <TextField
               margin="normal"
@@ -133,7 +186,12 @@ export default function LoginPage() {
               label="Подтвердите пароль"
               type="password"
               value={registerData.confirmPassword}
-              onChange={(e) => setRegisterData({ ...registerData, confirmPassword: e.target.value })}
+              onChange={(e) =>
+                setRegisterData({
+                  ...registerData,
+                  confirmPassword: e.target.value,
+                })
+              }
             />
             <Button
               type="submit"
@@ -148,4 +206,4 @@ export default function LoginPage() {
       </StyledPaper>
     </Container>
   );
-} 
+}

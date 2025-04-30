@@ -1,33 +1,26 @@
+import { useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import LoginPage from './components/LoginPage';
-import MainPage from './components/MainPage';
+import LoginPage from './pages/LoginPage';
+import MainPage from './pages/MainPage';
 import './App.css';
-// import { useEffect } from 'react';
-// import { fetchEspDevices } from './graphql/query/fetchEspDevices.query';
 
 function App() {
+  const [isAuthorized, setIsAuthorized] = useState(localStorage.getItem('authorized') === 'true');
 
-  /*
-  const retrieveEspDevices = async () => {
-    const result = await fetchEspDevices()
-    console.log(result)
-  } 
-
-  useEffect(() => {
-    retrieveEspDevices()
-    //fetchEspDevices().then((response) => console.log(response))
-    console.log('privet')
-  }, [])
-  */
-
-  
+  console.log(isAuthorized)
 
   return (
     <Router>
       <Routes>
-        <Route path="/main" element={<MainPage />} />
-        <Route path="/login" element={<LoginPage />} />
-        <Route path="/" element={<Navigate to="/main" replace />} />
+        <Route 
+          path="/main" 
+          element={isAuthorized ? <MainPage  setIsAuthorized={setIsAuthorized}/> : <Navigate to="/login" replace />} 
+        />
+        <Route 
+          path="/login" 
+          element={isAuthorized ? <Navigate to="/main" replace /> : <LoginPage onLogin={() => setIsAuthorized(true)} />} 
+        />
+        <Route path="/" element={<Navigate to="/login" replace />} />
       </Routes>
     </Router>
   );

@@ -10,6 +10,8 @@ import {
 } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import { fetchUserEspDevices } from '../graphql/query/fetchUserEspDevices.query';
+import ControlPanel from '../shared/ControlPanel';
+import { useNavigate } from 'react-router-dom';
 
 const NavBar = styled(Box)(({ theme }) => ({
   width: '200px',
@@ -37,6 +39,9 @@ const ProfileSection = styled(Box)(({ theme }) => ({
   top: theme.spacing(2),
   right: theme.spacing(2),
   zIndex: 1100,
+  display: 'flex',
+  gap: '1rem',
+  alignItems: 'center',
 }));
 
 const DeviceBox = styled(Paper)(({ theme }) => ({
@@ -69,32 +74,40 @@ const PageWrapper = styled(Box)({
   width: '100%',
 });
 
+// 👇 Accept the prop from App.tsx
+interface MainPageProps {
+  setIsAuthorized: (value: boolean) => void;
+}
 
-export default function MainPage() {
-  
+export default function MainPage({ setIsAuthorized }: MainPageProps) {
+  const navigate = useNavigate();
+
   const retrieveUserEspDevices = async () => {
-    const result = await fetchUserEspDevices("artur")
-    console.log(result)
-  } 
+    const result = await fetchUserEspDevices('artur');
+    console.log(result);
+  };
 
   useEffect(() => {
-    retrieveUserEspDevices()
-    //fetchEspDevices().then((response) => console.log(response))
-    console.log('privet')
-  }, [])
+    retrieveUserEspDevices();
+  }, []);
+
+  const handleLogout = () => {
+    localStorage.setItem('authorized', 'false');
+    setIsAuthorized(false);
+    navigate('/login');
+  };
 
   return (
     <PageWrapper>
       <ProfileSection>
+        <ControlPanel onLogout={handleLogout} />
         <IconButton size="large">
           <Avatar sx={{ width: 40, height: 40 }} />
         </IconButton>
       </ProfileSection>
 
       <NavBar>
-        <NavItem variant="h6">
-          Устройства
-        </NavItem>
+        <NavItem variant="h6">Устройства</NavItem>
       </NavBar>
 
       <MainContent>
@@ -102,15 +115,11 @@ export default function MainPage() {
           <Typography variant="h6" sx={{ mb: 2 }}>
             Устройств пока нет
           </Typography>
-          <Button
-            variant="contained"
-            startIcon={<AddIcon />}
-            sx={{ mt: 2 }}
-          >
+          <Button variant="contained" startIcon={<AddIcon />} sx={{ mt: 2 }}>
             Добавить новое
           </Button>
         </DeviceBox>
       </MainContent>
     </PageWrapper>
   );
-} 
+}
