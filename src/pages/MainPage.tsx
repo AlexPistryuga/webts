@@ -10,6 +10,7 @@ import {
 } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import { fetchUserEspDevices } from '../graphql/query/fetchUserEspDevices.query';
+import DeviceManager from './DeviceManager';
 import ControlPanel from '../shared/ControlPanel';
 import { useNavigate } from 'react-router-dom';
 
@@ -111,11 +112,16 @@ export default function MainPage({ setIsAuthorized }: MainPageProps) {
       </NavBar>
 
       <MainContent>
+      <DeviceManager />
         <DeviceBox elevation={3}>
           <Typography variant="h6" sx={{ mb: 2 }}>
             Устройств пока нет
           </Typography>
-          <Button variant="contained" startIcon={<AddIcon />} sx={{ mt: 2 }}>
+          <Button
+            variant="contained"
+            startIcon={<AddIcon />}
+            sx={{ mt: 2 }}
+          >
             Добавить новое
           </Button>
         </DeviceBox>

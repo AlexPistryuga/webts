@@ -10,13 +10,13 @@ import {
 } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import { useNavigate } from 'react-router-dom';
+import { styles } from '../styles/LoginPageStyles';
 
 interface TabPanelProps {
   children?: React.ReactNode;
   index: number;
   value: number;
 }
-
 interface LoginPageProps {
   onLogin: () => void;
 }
@@ -113,9 +113,9 @@ export default function LoginPage({ onLogin }: LoginPageProps) {
   };
 
   return (
-    <Container component="main" maxWidth="sm">
+    <Container component="main" maxWidth={styles.container.maxWidth}>
       <StyledPaper elevation={3}>
-        <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
+        <Box sx={styles.tabs}>
           <Tabs value={tabValue} onChange={handleTabChange} centered>
             <Tab label="Вход" />
             <Tab label="Регистрация" />
@@ -149,7 +149,7 @@ export default function LoginPage({ onLogin }: LoginPageProps) {
               type="submit"
               fullWidth
               variant="contained"
-              sx={{ mt: 3, mb: 2 }}
+              sx={styles.formButton}
             >
               Войти
             </Button>
@@ -197,7 +197,7 @@ export default function LoginPage({ onLogin }: LoginPageProps) {
               type="submit"
               fullWidth
               variant="contained"
-              sx={{ mt: 3, mb: 2 }}
+              sx={styles.formButton}
             >
               Зарегистрироваться
             </Button>
