@@ -1,50 +1,51 @@
 {
-  "compilerOptions": {
-      "allowJs": false,
-      "allowSyntheticDefaultImports": true,
+    "extends": "./tsconfig.paths.json",
+    "compilerOptions": {
+        "allowJs": false,
+        "allowSyntheticDefaultImports": true,
 
-      "strict": true,
-      "strictNullChecks": true,
-      "strictFunctionTypes": true,
-      "strictBindCallApply": true,
+        "strict": true,
+        "strictNullChecks": true,
+        "strictFunctionTypes": true,
+        "strictBindCallApply": true,
 
-      "noEmit": true,
-      "noImplicitAny": true,
-      "noImplicitThis": true,
-      "noUnusedLocals": false,
-      "noImplicitReturns": true,
-      "noUnusedParameters": true,
-      "noUncheckedIndexedAccess": true,
-      "noFallthroughCasesInSwitch": true,
-      "noPropertyAccessFromIndexSignature": true,
-      "jsx": "preserve",
-      "target": "ESNext",
-      "module": "ESNext",
-      "skipLibCheck": true,
-      "isolatedModules": true,
-      "esModuleInterop": false,
-      "resolveJsonModule": true,
-      "moduleResolution": "Node",
-      "experimentalDecorators": false,
-      "verbatimModuleSyntax": true,
-      "forceConsistentCasingInFileNames": true,
-      "useUnknownInCatchVariables": false,
-      "lib": ["DOM", "DOM.Iterable", "ESNext"],
-      "types": ["vite/client", "node"],
-      "plugins": [
-          {
-              "name": "gql.tada/ts-plugin",
-              "shouldCheckForColocatedFragments": false,
-              "trackFieldUsage": false,
-              "schemas": [
-                  {
-                      "name": "server",
-                      "schema": "./generated/tada/schema/server.graphql",
-                      "tadaOutputLocation": "./generated/tada/server-graphql-env.d.ts"
-                  }
-              ]
-          }
-      ]
+        "noEmit": true,
+        "noImplicitAny": true,
+        "noImplicitThis": true,
+        "noUnusedLocals": false,
+        "noImplicitReturns": true,
+        "noUnusedParameters": true,
+        "noUncheckedIndexedAccess": true,
+        "noFallthroughCasesInSwitch": true,
+        "noPropertyAccessFromIndexSignature": true,
+        "jsx": "preserve",
+        "target": "ESNext",
+        "module": "ESNext",
+        "skipLibCheck": true,
+        "isolatedModules": true,
+        "esModuleInterop": false,
+        "resolveJsonModule": true,
+        "moduleResolution": "Node",
+        "experimentalDecorators": false,
+        "verbatimModuleSyntax": true,
+        "forceConsistentCasingInFileNames": true,
+        "useUnknownInCatchVariables": false,
+        "lib": ["DOM", "DOM.Iterable", "ESNext"],
+
+        "plugins": [
+            {
+                "name": "gql.tada/ts-plugin",
+                "shouldCheckForColocatedFragments": false,
+                "trackFieldUsage": false,
+                "schemas": [
+                    {
+                        "name": "server",
+                        "schema": "./generated/tada/schema/server.graphql",
+                        "tadaOutputLocation": "./generated/tada/server-graphql-env.d.ts"
+                    }
+                ]
+            }
+        ]
   },
   "include": ["src", "generated"],
   "exclude": ["node_modules"]

@@ -1,0 +1,10 @@
+{
+    "compilerOptions": {
+        "baseUrl": ".",
+        "paths": {
+            "@/*": ["src/*"],
+            "@tada-server": ["generated/tada/server-graphql"],
+            "@tada-client": ["generated/tada/initTadaClient"]
+        }
+    }
+}

@@ -1,4 +1,3 @@
-# Logs
 logs
 *.log
 npm-debug.log*
@@ -12,9 +11,6 @@ dist
 dist-ssr
 *.local
 
-# Editor directories and files
-.vscode/*
-!.vscode/extensions.json
 .idea
 .DS_Store
 *.suo
@@ -22,3 +18,22 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+.idea
+.idea/
+.idea/*
+
+configs/env.local.ts
+dist/*
+
+.codetogether.ignore
+configs/env.local.ts
+
+generated/__ENV.ts
+docker-compose-sws*.yml
+QiankunPluginTest.ts
+ignore*
+report/*
+report/html/index.html
+.dccache
+bind-volume
+.history

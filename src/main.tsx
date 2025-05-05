@@ -24,7 +24,7 @@ const theme = createTheme({
   shape: {
     borderRadius: 8,
   },
-});
+})
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>

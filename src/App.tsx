@@ -7,8 +7,6 @@ import './App.css';
 function App() {
   const [isAuthorized, setIsAuthorized] = useState(localStorage.getItem('authorized') === 'true');
 
-  console.log(isAuthorized)
-
   return (
     <Router>
       <Routes>

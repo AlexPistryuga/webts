@@ -1,4 +1,4 @@
-import { getTadaServerClient, graphql, type VariablesOf } from "../../../generated/tada/server-graphql"
+import { getTadaServerClient, graphql, type VariablesOf } from "@tada-server"
 
 const getUserEspDevices = graphql(`
     query getUserEspDevices($username:String!) {

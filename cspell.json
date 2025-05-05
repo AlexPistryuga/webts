@@ -1,0 +1,20 @@
+{
+    "language": "en,ru",
+    "words": [
+        "Устройства"
+    ],
+    "ignorePaths": [
+        "package-lock.json",
+        "node_modules",
+        "vscode-extension",
+        ".git/objects",
+        ".vscode",
+        ".vscode-insiders",
+        "cspell.json",
+        "dist",
+        "yarn*",
+    ],
+    "ignoreRegExpList": [
+        "enum.*"
+    ]
+}

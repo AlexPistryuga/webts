@@ -1,4 +1,4 @@
-import { getTadaServerClient, graphql } from "../../../generated/tada/server-graphql"
+import { getTadaServerClient, graphql } from "@tada-server"
 
 const getEspDevices = graphql(`
     query getEspDevices {

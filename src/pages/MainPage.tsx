@@ -75,7 +75,6 @@ const PageWrapper = styled(Box)({
   width: '100%',
 });
 
-// 👇 Accept the prop from App.tsx
 interface MainPageProps {
   setIsAuthorized: (value: boolean) => void;
 }
