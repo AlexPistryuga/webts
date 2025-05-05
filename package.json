@@ -8,7 +8,7 @@
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "genserver": "gql.tada generate schema 'http://localhost:8080/v1/graphql' -o ./generated/tada/schema/server.graphql && gql-tada generate output"
+    "genserver": "dotenv -- cross-var gql.tada generate schema %VITE_GRAPHQL_ENDPOINT% -o ./generated/tada/schema/server.graphql && gql-tada generate output"
   },
   "dependencies": {
     "@emotion/react": "^11.14.0",
@@ -30,6 +30,9 @@
     "@types/react-dom": "^19.0.4",
     "@vitejs/plugin-react": "^4.3.4",
     "autoprefixer": "^10.4.21",
+    "cross-var": "^1.1.0",
+    "dotenv": "^16.5.0",
+    "dotenv-cli": "^8.0.0",
     "eslint": "^9.21.0",
     "eslint-plugin-react-hooks": "^5.1.0",
     "eslint-plugin-react-refresh": "^0.4.19",
