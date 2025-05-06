@@ -1,11 +1,14 @@
 import React, { useState, type FC } from 'react'
 import { Box, Tab, Tabs, TextField, Button, Container } from '@mui/material'
-import { useNavigate } from 'react-router-dom'
 
 import { StyledPaper, styles } from '../styles/LoginPageStyles'
 import { TabPanel } from './shared/TabPanel'
+import { useAuth$ } from '@/mst/provider'
+import { observer } from 'mobx-react-lite'
 
-export const LoginPage: FC<{ onLogin: () => void }> = ({ onLogin }) => {
+export const LoginPage: FC = observer(() => {
+    const { login, register } = useAuth$()
+
     const [tabValue, setTabValue] = useState(0)
     const [loginData, setLoginData] = useState({ username: '', password: '' })
     const [registerData, setRegisterData] = useState({
@@ -14,79 +17,38 @@ export const LoginPage: FC<{ onLogin: () => void }> = ({ onLogin }) => {
         confirmPassword: '',
     })
 
-    const navigate = useNavigate()
-
-    const handleTabChange = (_event: React.SyntheticEvent, newValue: number) => {
-        setTabValue(newValue)
-    }
-
-    const handleLogin = async (event: React.FormEvent) => {
-        event.preventDefault()
-
-        try {
-            const response = await fetch('http://localhost:8100/login', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ ...loginData, username: loginData.username.trim() }),
-            })
-
-            if (!response.ok) throw new Error('Login failed')
-
-            const data = await response.json()
-            console.log('Login successful', data)
-
-            localStorage.setItem('authorized', 'true')
-            onLogin() // Notify App to update routing
-            navigate('/main')
-        } catch (error) {
-            console.error('Error logging in:', error)
-            alert('Ошибка входа: проверьте логин и пароль')
-        }
-    }
-
     const handleRegister = async (event: React.FormEvent) => {
         event.preventDefault()
 
-        if (registerData.password !== registerData.confirmPassword) {
-            alert('Пароли не совпадают!')
-            return
+        const { confirmPassword, ...registerDataToSend } = registerData
+
+        if (registerDataToSend.password !== confirmPassword) {
+            return alert('Different passwords')
         }
 
-        try {
-            const response = await fetch('http://localhost:8100/register', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    username: registerData.username,
-                    password: registerData.password,
-                }),
-            })
+        await register(registerDataToSend)
 
-            if (!response.ok) throw new Error('Registration failed')
-
-            const data = await response.json()
-            console.log('Registration successful', data)
-
-            setTabValue(0) // Switch to login tab
-            setRegisterData({ username: '', password: '', confirmPassword: '' })
-        } catch (error) {
-            console.error('Error registering:', error)
-            alert('Ошибка регистрации. Попробуйте другое имя пользователя.')
-        }
+        setTabValue(0)
+        setRegisterData({ username: '', password: '', confirmPassword: '' })
     }
 
     return (
         <Container component='main' maxWidth={styles.container.maxWidth}>
             <StyledPaper elevation={3}>
                 <Box sx={styles.tabs}>
-                    <Tabs value={tabValue} onChange={handleTabChange} centered>
+                    <Tabs value={tabValue} onChange={(_, tab) => setTabValue(tab)} centered>
                         <Tab label='Вход' />
                         <Tab label='Регистрация' />
                     </Tabs>
                 </Box>
 
                 <TabPanel value={tabValue} index={0}>
-                    <form onSubmit={handleLogin}>
+                    <form
+                        onSubmit={(e) => {
+                            e.preventDefault()
+                            login(loginData)
+                        }}
+                    >
                         <TextField
                             margin='normal'
                             required
@@ -151,4 +113,4 @@ export const LoginPage: FC<{ onLogin: () => void }> = ({ onLogin }) => {
             </StyledPaper>
         </Container>
     )
-}
+})

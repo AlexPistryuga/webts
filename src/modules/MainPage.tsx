@@ -1,10 +1,9 @@
 import { useEffect, type FC } from 'react'
-import { Typography, Button, Paper, IconButton, Avatar } from '@mui/material'
+import { Typography, Button, IconButton, Avatar } from '@mui/material'
 import AddIcon from '@mui/icons-material/Add'
-import { useNavigate } from 'react-router-dom'
 
 import { fetchUserEspDevices } from '../graphql/queries/fetchUserEspDevices.query'
-import ControlPanel from '../shared/ControlPanel'
+import { ControlPanel } from '../shared/ControlPanel'
 
 import DeviceManager from './DeviceManager'
 import {
@@ -16,9 +15,7 @@ import {
     ProfileSection,
 } from './styled-components/MainPageStyles'
 
-export const MainPage: FC<{ setIsAuthorized: (value: boolean) => void }> = ({ setIsAuthorized }) => {
-    const navigate = useNavigate()
-
+export const MainPage: FC = () => {
     const retrieveUserEspDevices = async () => {
         const result = await fetchUserEspDevices('artur')
         console.log(result)
@@ -28,16 +25,10 @@ export const MainPage: FC<{ setIsAuthorized: (value: boolean) => void }> = ({ se
         retrieveUserEspDevices()
     }, [])
 
-    const handleLogout = () => {
-        localStorage.setItem('authorized', 'false')
-        setIsAuthorized(false)
-        navigate('/login')
-    }
-
     return (
         <PageWrapper>
             <ProfileSection>
-                <ControlPanel onLogout={handleLogout} />
+                <ControlPanel />
                 <IconButton size='large'>
                     <Avatar sx={{ width: 40, height: 40 }} />
                 </IconButton>

@@ -11,6 +11,7 @@ export default async () => {
             hmr: { protocol: 'ws' },
             port: 3000,
         },
+        base: '/',
         resolve: { alias },
     })
 }

@@ -1,22 +1,14 @@
-// ControlPanel.tsx
+import { useAuth$ } from '@/mst/provider'
 import { Button } from '@mui/material'
-import React from 'react'
+import { observer } from 'mobx-react-lite'
+import { type FC } from 'react'
 
-interface Props {
-    onLogout: () => void
-}
-
-const ControlPanel: React.FC<Props> = ({ onLogout }) => {
-    const handleLogout = () => {
-        localStorage.setItem('authorized', 'false')
-        onLogout() // Notify parent to redirect
-    }
+export const ControlPanel: FC = observer(() => {
+    const { logout } = useAuth$()
 
     return (
         <div>
-            <Button onClick={handleLogout}>Logout</Button>
+            <Button onClick={() => logout()}>Выйти</Button>
         </div>
     )
-}
-
-export default ControlPanel
+})

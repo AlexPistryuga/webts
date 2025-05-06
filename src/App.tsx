@@ -1,37 +1,30 @@
-import { useState } from 'react'
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 
 import './App.css'
 
-import { LoginPage } from './pages/LoginPage'
-import { MainPage } from './pages/MainPage'
+import { LoginPage } from './modules/LoginPage'
+import { MainPage } from './modules/MainPage'
+import { useAuth$ } from './mst/provider'
+import { observer } from 'mobx-react-lite'
 
-function App() {
-    const [isAuthorized, setIsAuthorized] = useState(localStorage.getItem('authorized') === 'true')
+export default observer(function () {
+    const { is_authenticated } = useAuth$()
 
     return (
-        <Router>
-            <Routes>
-                <Route
-                    path='/main'
-                    element={
-                        isAuthorized ? <MainPage setIsAuthorized={setIsAuthorized} /> : <Navigate to='/login' replace />
-                    }
-                />
-                <Route
-                    path='/login'
-                    element={
-                        isAuthorized ? (
-                            <Navigate to='/main' replace />
-                        ) : (
-                            <LoginPage onLogin={() => setIsAuthorized(true)} />
-                        )
-                    }
-                />
-                <Route path='/' element={<Navigate to='/login' replace />} />
-            </Routes>
-        </Router>
-    )
-}
+        <BrowserRouter>
+            {!is_authenticated ? (
+                <Routes>
+                    <Route path={'/login'} element={<LoginPage />} />
 
-export default App
+                    <Route path={'/*'} element={<Navigate to={'/login'} />} />
+                </Routes>
+            ) : (
+                <Routes>
+                    <Route path={'/main'} element={<MainPage />} />
+
+                    <Route path={'/*'} element={<Navigate to={'/main'} />} />
+                </Routes>
+            )}
+        </BrowserRouter>
+    )
+})

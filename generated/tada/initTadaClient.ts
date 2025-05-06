@@ -1,4 +1,4 @@
-import { clientConfig } from '@configs/client.config'
+import { HasuraCfg } from '@configs/env.config'
 import { type Client, type ClientOptions, createClient, fetchExchange } from '@urql/core'
 
 export const initTadaClient = (clientOptions?: Partial<ClientOptions>) => {
@@ -21,12 +21,12 @@ export const initTadaClient = (clientOptions?: Partial<ClientOptions>) => {
             ..._clientOptions.fetchOptions,
             headers: {
                 'Content-Type': 'application/json; charset=UTF-8',
-                ['x-hasura-admin-secret']: clientConfig.secret,
+                ['x-hasura-admin-secret']: HasuraCfg.secret,
             },
         }
 
         if (!clientOptions?.url) {
-            _clientOptions.url = clientConfig.host
+            _clientOptions.url = HasuraCfg.gql_endpoint
         }
 
         _clientOptions.exchanges = [fetchExchange, ...(_clientOptions.exchanges || [])]
