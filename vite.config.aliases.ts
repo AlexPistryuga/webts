@@ -4,6 +4,7 @@ import type { AliasOptions } from 'vite'
 
 export const alias: AliasOptions = {
     '@': path.resolve(__dirname, 'src'),
+    '@configs': path.resolve(__dirname, 'configs'),
     '@helpers': path.resolve(__dirname, 'src/helpers'),
     '@graphql': path.resolve(__dirname, 'src/graphql'),
     '@packageJson': path.resolve(__dirname, 'package.json'),

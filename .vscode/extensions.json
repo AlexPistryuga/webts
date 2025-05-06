@@ -1,0 +1,21 @@
+{
+    "recommendations": [
+        "eamodio.gitlens",
+        "bradlc.vscode-tailwindcss",
+        "dbaeumer.vscode-eslint",
+        "formulahendry.auto-rename-tag",
+        "IronGeek.vscode-env",
+        "GraphQL.vscode-graphql",
+        "graphql.vscode-graphql-syntax",
+        "stylelint.vscode-stylelint",
+        "esbenp.prettier-vscode",
+        "ms-kubernetes-tools.vscode-kubernetes-tools",
+        "ms-vscode-remote.remote-containers",
+        "ZainChen.json",
+        "Gruntfuggly.todo-tree",
+        "streetsidesoftware.code-spell-checker",
+        "streetsidesoftware.code-spell-checker-norwegian-bokmal",
+        "yoavbls.pretty-ts-errors",
+        "cardinal90.multi-cursor-case-preserve"
+    ]
+}

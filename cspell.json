@@ -1,6 +1,7 @@
 {
     "language": "en,ru",
     "words": [
+        "HASURA",
         "Устройства"
     ],
     "ignorePaths": [
@@ -12,7 +13,7 @@
         ".vscode-insiders",
         "cspell.json",
         "dist",
-        "yarn*",
+        "yarn*"
     ],
     "ignoreRegExpList": [
         "enum.*"

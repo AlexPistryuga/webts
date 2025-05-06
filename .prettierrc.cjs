@@ -12,4 +12,5 @@ module.exports = {
     bracketSameLine: false,
     arrowParens: 'always',
     printWidth: 120,
+    
 }

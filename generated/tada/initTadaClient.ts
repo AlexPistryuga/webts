@@ -1,8 +1,7 @@
-
+import { clientConfig } from '@configs/client.config'
 import { type Client, type ClientOptions, createClient, fetchExchange } from '@urql/core'
 
-
-export const initTadaClient = ( clientOptions?: Partial<ClientOptions> ) => {
+export const initTadaClient = (clientOptions?: Partial<ClientOptions>) => {
     let tadaClient: Client | undefined = undefined
 
     const getClient = async () => {
@@ -10,20 +9,27 @@ export const initTadaClient = ( clientOptions?: Partial<ClientOptions> ) => {
         return tadaClient
     }
 
-    async function createTadaClient({  clientOptions }: {
+    async function createTadaClient({
+        clientOptions,
+    }: {
         clientOptions?: Partial<ClientOptions>
         anonymous?: boolean
     }) {
         const _clientOptions = clientOptions || {}
 
-        if (!clientOptions?.url) {
-            _clientOptions.url = `http://localhost:8080/v1/graphql`
+        _clientOptions.fetchOptions = {
+            ..._clientOptions.fetchOptions,
+            headers: {
+                'Content-Type': 'application/json; charset=UTF-8',
+                ['x-hasura-admin-secret']: clientConfig.secret,
+            },
         }
 
-        _clientOptions.exchanges = [
-            fetchExchange,
-            ...(_clientOptions.exchanges || []),
-        ]
+        if (!clientOptions?.url) {
+            _clientOptions.url = clientConfig.host
+        }
+
+        _clientOptions.exchanges = [fetchExchange, ...(_clientOptions.exchanges || [])]
 
         _clientOptions.requestPolicy = 'cache-and-network'
 

@@ -58,3 +58,8 @@ export const PageWrapper = styled(Box)({
   minHeight: '100vh',
   width: '100%',
 }); 
+
+export const StyledPaper = styled(Paper)(({ theme }) => ({
+    padding: theme.spacing(3),
+    marginTop: theme.spacing(8),
+}))

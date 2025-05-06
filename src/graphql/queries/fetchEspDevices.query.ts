@@ -1,4 +1,4 @@
-import { getTadaServerClient, graphql } from "@tada-server"
+import { getTadaServerClient, graphql } from '@tada-server'
 
 const getEspDevices = graphql(`
     query getEspDevices {
@@ -11,16 +11,15 @@ const getEspDevices = graphql(`
 
 export async function fetchEspDevices() {
     try {
-        const { query,  } = await getTadaServerClient()
+        const { query } = await getTadaServerClient()
 
         const { data, error } = await query(getEspDevices, {})
 
         if (error) throw error
 
         return data
-    } catch(e) {
+    } catch (e) {
         console.error(e)
-        return 
-
+        return
     }
 }
