@@ -21,9 +21,10 @@ import './styles/DeviceManager.css'
 import { observer } from 'mobx-react-lite'
 import { useAuth$ } from '@/mst/provider'
 import type { IDevice } from '@/mst/types'
+import { SearchOffOutlined } from '@mui/icons-material'
 
 export const DeviceManager: FC = observer(() => {
-    const { devicesDelta, insertEspUserDevice, user_devices } = useAuth$()
+    const { devicesDelta, insertEspUserDevice, user_devices, fetchEspDevices } = useAuth$()
 
     const [open, setOpen] = useState(false)
     const [selectedDevice, setSelectedDevice] = useState<IDevice | null>(null)
@@ -57,7 +58,13 @@ export const DeviceManager: FC = observer(() => {
                 <Typography variant='h5' className='device-manager__title'>
                     Устройства
                 </Typography>
-                <IconButton onClick={() => setOpen(true)} color='primary'>
+                <IconButton
+                    onClick={() => {
+                        setOpen(true)
+                        fetchEspDevices()
+                    }}
+                    color='primary'
+                >
                     <AddIcon />
                 </IconButton>
             </Box>
@@ -83,11 +90,18 @@ export const DeviceManager: FC = observer(() => {
                 <DialogContent>
                     <List>
                         <RadioGroup value={selectedDevice?.mac_addr || ''} onChange={handleDeviceSelect}>
-                            {devicesDelta.map(({ mac_addr }) => (
-                                <ListItem key={mac_addr} className='dialog-item'>
-                                    <FormControlLabel value={mac_addr} control={<Radio />} label={mac_addr} />
-                                </ListItem>
-                            ))}
+                            {!!devicesDelta.length ? (
+                                devicesDelta.map(({ mac_addr }) => (
+                                    <ListItem key={mac_addr} className='dialog-item'>
+                                        <FormControlLabel value={mac_addr} control={<Radio />} label={mac_addr} />
+                                    </ListItem>
+                                ))
+                            ) : (
+                                <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                                    <SearchOffOutlined />
+                                    <Typography className='device-card__status'>{'Нет доступных устройств'}</Typography>
+                                </div>
+                            )}
                         </RadioGroup>
                     </List>
                     {selectedDevice && (

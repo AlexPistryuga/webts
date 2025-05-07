@@ -17,6 +17,7 @@ export const Auth$ = types
         esp_devices: types.optional(types.array(Device), []),
         user_devices: types.optional(types.array(types.string), []),
     })
+    // .volatile(() => ({ isFetching: false }))
     .views((self) => ({
         get devicesDelta() {
             return self.esp_devices.filter(({ mac_addr }) => !self.user_devices.includes(mac_addr))
