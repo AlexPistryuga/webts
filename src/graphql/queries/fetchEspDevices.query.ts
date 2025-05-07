@@ -10,16 +10,11 @@ const getEspDevices = graphql(`
 `)
 
 export async function fetchEspDevices() {
-    try {
-        const { query } = await getTadaServerClient()
+    const { query } = await getTadaServerClient()
 
-        const { data, error } = await query(getEspDevices, {})
+    const { data, error } = await query(getEspDevices, {})
 
-        if (error) throw error
+    if (error) throw error
 
-        return data
-    } catch (e) {
-        console.error(e)
-        return
-    }
+    return data?.espmac || []
 }

@@ -6,9 +6,14 @@ import { LoginPage } from './modules/LoginPage'
 import { MainPage } from './modules/MainPage'
 import { useAuth$ } from './mst/provider'
 import { observer } from 'mobx-react-lite'
+import { useEffect } from 'react'
 
 export default observer(function () {
-    const { is_authenticated } = useAuth$()
+    const { is_authenticated, fetchEspDevices } = useAuth$()
+
+    useEffect(() => {
+        fetchEspDevices()
+    }, [])
 
     return (
         <BrowserRouter>

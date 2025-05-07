@@ -1,6 +1,8 @@
 {
     "language": "en,ru",
     "words": [
+        "espmac",
+        "espusermac",
         "HASURA",
         "Устройства"
     ],

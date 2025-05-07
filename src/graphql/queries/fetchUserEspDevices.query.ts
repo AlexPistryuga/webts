@@ -1,3 +1,4 @@
+import { getParsedJwt, getParsedJwtOrThrow } from '@/persisted/token.parser'
 import { getTadaServerClient, graphql, type VariablesOf } from '@tada-server'
 
 const getUserEspDevices = graphql(`
@@ -8,19 +9,14 @@ const getUserEspDevices = graphql(`
     }
 `)
 
-export async function fetchUserEspDevices(username: VariablesOf<typeof getUserEspDevices>['username']) {
-    try {
-        const { query } = await getTadaServerClient()
+export async function fetchUserEspDevices() {
+    const { query } = await getTadaServerClient()
 
-        const { data, error } = await query(getUserEspDevices, {
-            username,
-        })
+    const { username } = getParsedJwtOrThrow()
 
-        if (error) throw error
+    const { data, error } = await query(getUserEspDevices, { username })
 
-        return data
-    } catch (e) {
-        console.error(e)
-        return
-    }
+    if (error) throw error
+
+    return data?.espusermac.map(({ mac_addr }) => mac_addr) || []
 }
