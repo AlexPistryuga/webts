@@ -12,6 +12,7 @@ import { fetchEspData } from '@/graphql/queries/fetchEspData.query'
 import { EspData } from '../models/EspData.model'
 import { getSelectedMacFromPath } from '@/helpers/url.helper'
 import { auth$ } from '../provider'
+import { updateEspDataRecord } from '@/graphql/mutation/updateEspDataRecord.mutation'
 
 export const Auth$ = types
     .model('AuthStore', {
@@ -100,6 +101,20 @@ export const Auth$ = types
                 const inserted = yield* toGenerator(insertEspUserDevice(device.mac_addr))
 
                 inserted && self.user_devices.push(inserted.mac_addr)
+            } catch (e) {
+                processServerError(e)
+            }
+        }),
+
+        updateEspDataRecord: flow(function* (params: Parameters<typeof updateEspDataRecord>[0]) {
+            try {
+                const returning = yield* toGenerator(updateEspDataRecord(params))
+
+                if (!returning) return
+
+                const index = self.device_data.findIndex(({ id }) => id === params.id)
+
+                if (index !== -1) self.device_data[index]!.data = returning.data
             } catch (e) {
                 processServerError(e)
             }

@@ -33,7 +33,15 @@ export const LoginPage: FC = observer(() => {
     }
 
     return (
-        <Container component='main' maxWidth={styles.container.maxWidth}>
+        <Box
+            sx={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                width: '100vw',
+                height: '100vh',
+            }}
+        >
             <StyledPaper elevation={3}>
                 <Box sx={styles.tabs}>
                     <Tabs value={tabValue} onChange={(_, tab) => setTabValue(tab)} centered>
@@ -111,6 +119,6 @@ export const LoginPage: FC = observer(() => {
                     </form>
                 </TabPanel>
             </StyledPaper>
-        </Container>
+        </Box>
     )
 })

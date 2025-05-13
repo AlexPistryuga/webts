@@ -1,4 +1,4 @@
-import { useState, type FC } from 'react'
+import { Fragment, useState, type FC } from 'react'
 import {
     Box,
     Button,
@@ -98,29 +98,32 @@ export const DeviceManager: FC = observer(() => {
                 <DialogTitle>Добавить устройство</DialogTitle>
                 <DialogContent>
                     {devicesDelta.length ? (
-                        <TextField
-                            fullWidth
-                            label='MAC адрес устройства'
-                            value={macInput}
-                            onChange={handleMacInputChange}
-                            className='dialog-password'
-                            margin='dense'
-                        />
+                        <Fragment>
+                            <TextField
+                                fullWidth
+                                label='MAC адрес устройства'
+                                value={macInput}
+                                onChange={handleMacInputChange}
+                                className='dialog-password'
+                                margin='dense'
+                            />
+
+                            <TextField
+                                fullWidth
+                                label='Пароль устройства'
+                                type='password'
+                                value={password}
+                                onChange={(e) => setPassword(e.target.value)}
+                                className='dialog-password'
+                                margin='dense'
+                            />
+                        </Fragment>
                     ) : (
                         <Box display='flex' alignItems='center' gap={1} mt={2}>
                             <SearchOffOutlined />
                             <Typography className='device-card__status'>{'Нет доступных устройств'}</Typography>
                         </Box>
                     )}
-                    <TextField
-                        fullWidth
-                        label='Пароль устройства'
-                        type='password'
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        className='dialog-password'
-                        margin='dense'
-                    />
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={handleClose}>Отмена</Button>

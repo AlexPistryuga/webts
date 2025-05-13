@@ -16,9 +16,15 @@ import {
     TableContainer,
     TableHead,
     TableRow,
+    Dialog,
+    DialogTitle,
+    DialogContent,
+    DialogActions,
+    Button,
+    TextField,
 } from '@mui/material'
 import { observer } from 'mobx-react-lite'
-import { useEffect, useState, type FunctionComponent } from 'react'
+import { useCallback, useEffect, useState, type FunctionComponent } from 'react'
 import { Line } from 'react-chartjs-2'
 import {
     Chart as ChartJS,
@@ -36,43 +42,51 @@ import { StyledFlexColumnShell } from './styled-components/MainPageStyles'
 ChartJS.register(CategoryScale, LinearScale, LineElement, PointElement, Title, Tooltip, Legend)
 
 export const DeviceDetails: FunctionComponent = observer(() => {
-    const { device_data, fetchEspData } = useAuth$()
+    const { device_data, fetchEspData, updateEspDataRecord } = useAuth$()
     const { selectedMac } = useParamMac()
 
     const [selectedKeys, setSelectedKeys] = useState<string[]>([])
     const [dataMap, setDataMap] = useState<Record<string, number[]>>({})
+    const [selectedRow, setSelectedRow] = useState<number | null>(null)
     const [timeLabels, setTimeLabels] = useState<string[]>([])
     const [availableKeys, setAvailableKeys] = useState<string[]>([])
     const [tab, setTab] = useState<'charts' | 'table'>('table')
 
+    const [openDialog, setOpenDialog] = useState(false)
+    const [dialogData, setDialogData] = useState<Record<string, unknown>>({})
+
+    const parseDataForCharts = useCallback(() => {
+        const keys = new Set<string>()
+        const dataAccumulator: Record<string, number[]> = {}
+        const idAccumulator: string[] = []
+
+        device_data.forEach(({ data, id }) => {
+            const parsed = JSON.parse(data)
+            idAccumulator.push(id.toString())
+
+            for (const key of Object.keys(parsed)) {
+                keys.add(key)
+                if (!dataAccumulator[key]) {
+                    dataAccumulator[key] = []
+                }
+                dataAccumulator[key].push(parsed[key])
+            }
+        })
+
+        setAvailableKeys(Array.from(keys))
+        setDataMap(dataAccumulator)
+        setTimeLabels(idAccumulator)
+    }, [])
+
     useEffect(() => {
         const fetchAndParse = async () => {
             await fetchEspData()
-
-            const keys = new Set<string>()
-            const dataAccumulator: Record<string, number[]> = {}
-            const timeAccumulator: string[] = []
-
-            device_data.forEach(({ data }, index) => {
-                const parsed = JSON.parse(data)
-                timeAccumulator.push((index + 1).toString())
-
-                for (const key of Object.keys(parsed)) {
-                    keys.add(key)
-                    if (!dataAccumulator[key]) {
-                        dataAccumulator[key] = []
-                    }
-                    dataAccumulator[key].push(parsed[key])
-                }
-            })
-
-            setAvailableKeys(Array.from(keys))
-            setDataMap(dataAccumulator)
-            setTimeLabels(timeAccumulator)
+            parseDataForCharts()
         }
 
         fetchAndParse()
         const intervalId = setInterval(fetchAndParse, 12_000)
+
         return () => clearInterval(intervalId)
     }, [])
 
@@ -136,14 +150,27 @@ export const DeviceDetails: FunctionComponent = observer(() => {
                                 </TableRow>
                             </TableHead>
                             <TableBody>
-                                {timeLabels.map((_, index) => (
-                                    <TableRow key={index}>
-                                        <TableCell>{index + 1}</TableCell>
-                                        {availableKeys.map((key) => (
-                                            <TableCell key={key}>{String(dataMap[key]?.[index])}</TableCell>
-                                        ))}
-                                    </TableRow>
-                                ))}
+                                {device_data.map(({ id, data }) => {
+                                    const parsed = JSON.parse(data)
+
+                                    return (
+                                        <TableRow
+                                            key={id}
+                                            hover
+                                            sx={{ cursor: 'pointer' }}
+                                            onClick={() => {
+                                                setDialogData(parsed)
+                                                setSelectedRow(id)
+                                                setOpenDialog(true)
+                                            }}
+                                        >
+                                            <TableCell>{id}</TableCell>
+                                            {availableKeys.map((key) => (
+                                                <TableCell key={key}>{String(parsed[key])}</TableCell>
+                                            ))}
+                                        </TableRow>
+                                    )
+                                })}
                             </TableBody>
                         </Table>
                     </TableContainer>
@@ -244,6 +271,94 @@ export const DeviceDetails: FunctionComponent = observer(() => {
                     ))}
                 </StyledFlexColumnShell>
             )}
+
+            <Dialog open={openDialog} onClose={() => setOpenDialog(false)} maxWidth='sm' fullWidth>
+                <DialogTitle>Данные строки</DialogTitle>
+                <DialogContent dividers sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 1 }}>
+                    {Object.entries(dialogData).map(([key, value]) => {
+                        const type = typeof value
+
+                        if (type === 'boolean') {
+                            return (
+                                <FormControlLabel
+                                    key={key}
+                                    sx={{ width: 'fit-content' }}
+                                    control={
+                                        <Checkbox
+                                            checked={value as boolean}
+                                            onChange={(e) =>
+                                                setDialogData((prev) => ({
+                                                    ...prev,
+                                                    [key]: e.target.checked,
+                                                }))
+                                            }
+                                        />
+                                    }
+                                    label={formatKey(key)}
+                                />
+                            )
+                        }
+
+                        return (
+                            <TextField
+                                key={key}
+                                label={formatKey(key)}
+                                value={String(value)}
+                                type={'text'}
+                                onChange={({ target }) =>
+                                    setDialogData((prev) => ({
+                                        ...prev,
+                                        [key]: target.value,
+                                    }))
+                                }
+                                fullWidth
+                            />
+                        )
+                    })}
+                </DialogContent>
+                <DialogActions>
+                    <Button
+                        variant={'contained'}
+                        onClick={async () => {
+                            if (!selectedRow) return
+
+                            const parsedData: Record<string, any> = {}
+
+                            for (const key in dialogData) {
+                                const value = dialogData[key]
+                                let originalValue = device_data.find((device) => device.id === selectedRow)?.data
+
+                                if (originalValue) originalValue = JSON.parse(originalValue)[key]
+
+                                if (originalValue !== undefined) {
+                                    const originalType = typeof originalValue
+
+                                    if (originalType === 'number') {
+                                        const numValue = parseFloat(value as string)
+
+                                        if (!isNaN(numValue)) parsedData[key] = numValue
+                                        else {
+                                            alert(`Значение ${value} для строки ${key} не соотвествует типам`)
+                                            parsedData[key] = originalValue
+                                        }
+                                    } else {
+                                        parsedData[key] = value
+                                    }
+                                } else {
+                                    parsedData[key] = value
+                                }
+                            }
+
+                            await updateEspDataRecord({ data: parsedData, id: selectedRow })
+                            parseDataForCharts()
+                            setOpenDialog(false)
+                        }}
+                    >
+                        Заменить данные
+                    </Button>
+                    <Button onClick={() => setOpenDialog(false)}>Закрыть</Button>
+                </DialogActions>
+            </Dialog>
         </Box>
     )
 })

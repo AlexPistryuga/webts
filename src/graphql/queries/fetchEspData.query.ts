@@ -2,7 +2,8 @@ import { getTadaServerClient, graphql, type VariablesOf } from '@tada-server'
 
 const EspDataQuery = graphql(`
     query fetchEspData($mac: String!) {
-        esp_data(where: { mac_addr: { _eq: $mac } }) {
+        esp_data(where: { mac_addr: { _eq: $mac } }, order_by: { id: asc }) {
+            id
             mac_addr
             data
         }
@@ -20,6 +21,7 @@ export async function fetchEspData(mac: VariablesOf<typeof EspDataQuery>['mac'])
 
     /** @emits data can be object of any structure */
     return data.esp_data.map((esp) => ({
+        id: esp.id,
         mac_addr: esp.mac_addr,
         data: JSON.stringify(esp.data),
     }))
