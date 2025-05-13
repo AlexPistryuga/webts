@@ -5,7 +5,7 @@ import { TokenStorage } from '@/persisted/token.storage'
 import { authService } from '@/services/auth.service'
 import { processServerError } from '@/services/axios.error'
 import type { AxiosError } from 'axios'
-import { flow, toGenerator, types } from 'mobx-state-tree'
+import { applySnapshot, flow, toGenerator, types } from 'mobx-state-tree'
 import { Device } from '../models/Device.model'
 import type { IDevice } from '../types'
 import { insertEspUserDevice } from '@/graphql/mutation/insertEspUserDevice.mutation'
@@ -26,7 +26,9 @@ export const Auth$ = types
     .actions((self) => ({
         logout() {
             TokenStorage.clear()
-            self.is_authenticated = false
+
+            // reset store
+            applySnapshot(self, {})
         },
 
         login: flow(function* (loginData: Parameters<typeof authService.login>[0]) {
