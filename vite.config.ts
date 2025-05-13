@@ -4,6 +4,9 @@ import react from '@vitejs/plugin-react'
 
 export default async () => {
     return defineConfig({
+        optimizeDeps: {
+            include: ['chart.js', 'react-chartjs-2'],
+        },
         plugins: [react()],
         server: {
             host: 'localhost',

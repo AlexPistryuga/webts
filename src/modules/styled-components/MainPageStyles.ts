@@ -2,6 +2,9 @@ import { Box, Typography, Paper } from '@mui/material'
 import { styled } from '@mui/material/styles'
 
 export const NavBar = styled(Box)(({ theme }) => ({
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'space-between',
     width: '200px',
     backgroundColor: theme.palette.primary.main,
     padding: theme.spacing(2),
@@ -20,13 +23,6 @@ export const MainContent = styled(Box)(({ theme }) => ({
     alignItems: 'center',
     justifyContent: 'center',
     marginLeft: '200px',
-}))
-
-export const ProfileSection = styled(Box)(({ theme }) => ({
-    position: 'fixed',
-    top: theme.spacing(2),
-    right: theme.spacing(2),
-    zIndex: 1100,
 }))
 
 export const DeviceBox = styled(Paper)(({ theme }) => ({
@@ -52,11 +48,21 @@ export const NavItem = styled(Typography)(({ theme }) => ({
     },
 }))
 
+export const NavIconOutlined = styled(NavItem)(() => ({
+    display: 'flex',
+    flexWrap: 'nowrap',
+    border: '1px solid gray',
+    borderRadius: '8px',
+    alignItems: 'center',
+    justifyContent: 'center',
+}))
+
 export const PageWrapper = styled(Box)({
     position: 'relative',
     display: 'flex',
     minHeight: '100vh',
-    width: '100%',
+    marginLeft: '220px',
+    width: 'calc(100vw - 244px)',
 })
 
 export const StyledPaper = styled(Paper)(({ theme }) => ({
@@ -64,9 +70,16 @@ export const StyledPaper = styled(Paper)(({ theme }) => ({
     marginTop: theme.spacing(8),
 }))
 
-export const StyledRegisteredUser = styled(Typography)(({ theme }) => ({
-    backgroundColor: theme.palette.primary.main,
-    borderRadius: '8px',
-    paddingBlock: '4px',
-    color: 'white',
+export const StyledFlexRowShell = styled(Box)(() => ({
+    display: 'flex',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    columnGap: '1rem',
+}))
+
+export const StyledFlexColumnShell = styled(Box)(() => ({
+    display: 'flex',
+    flexDirection: 'column',
+    rowGap: '1rem',
 }))

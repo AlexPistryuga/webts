@@ -7,7 +7,6 @@ import {
     DialogContent,
     DialogActions,
     List,
-    ListItem,
     TextField,
     IconButton,
     Typography,
@@ -19,9 +18,12 @@ import { observer } from 'mobx-react-lite'
 import { useAuth$ } from '@/mst/provider'
 import type { IDevice } from '@/mst/types'
 import { SearchOffOutlined } from '@mui/icons-material'
+import { useNavigate } from 'react-router-dom'
 
 export const DeviceManager: FC = observer(() => {
-    const { devicesDelta, insertEspUserDevice, user_devices, fetchEspDevices } = useAuth$()
+    const { devicesDelta, insertEspUserDevice, user_devices, fetchEspDevices, clearDeviceData } = useAuth$()
+
+    const navigate = useNavigate()
 
     const [open, setOpen] = useState(false)
     const [selectedDevice, setSelectedDevice] = useState<IDevice | null>(null)
@@ -63,7 +65,7 @@ export const DeviceManager: FC = observer(() => {
                         setOpen(true)
                         fetchEspDevices()
                     }}
-                    color='primary'
+                    color={'primary'}
                 >
                     <AddIcon />
                 </IconButton>
@@ -79,18 +81,11 @@ export const DeviceManager: FC = observer(() => {
                             </Box>
                             <Button
                                 variant='contained'
-                                onClick={() =>
-                                    console.log(
-                                        JSON.stringify({
-                                            humidity: 49,
-                                            relay_state: true,
-                                            temperature: 22.6,
-                                            led_brightness: 512,
-                                            light_intensity: 5,
-                                        }),
-                                    )
-                                }
                                 className='device-card__button'
+                                onClick={() => {
+                                    navigate(`/devices/${device}`)
+                                    clearDeviceData()
+                                }}
                             >
                                 Открыть устройство
                             </Button>

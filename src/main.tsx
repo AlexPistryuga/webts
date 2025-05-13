@@ -2,10 +2,10 @@ import React from 'react'
 import ReactDOM from 'react-dom/client'
 import { CssBaseline, ThemeProvider, createTheme } from '@mui/material'
 
-import App from './App'
-
 import './index.css'
 import { auth$, Auth$Provider } from './mst/provider'
+import { BrowserRouter } from 'react-router-dom'
+import RoutesManager from './RoutesManager'
 
 const theme = createTheme({
     palette: {
@@ -30,12 +30,12 @@ const theme = createTheme({
 })
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
-    <React.StrictMode>
-        <Auth$Provider value={auth$}>
-            <ThemeProvider theme={theme}>
-                <CssBaseline />
-                <App />
-            </ThemeProvider>
-        </Auth$Provider>
-    </React.StrictMode>,
+    <Auth$Provider value={auth$}>
+        <ThemeProvider theme={theme}>
+            <CssBaseline />
+            <BrowserRouter future={{ v7_relativeSplatPath: true, v7_startTransition: true }}>
+                <RoutesManager />
+            </BrowserRouter>
+        </ThemeProvider>
+    </Auth$Provider>,
 )

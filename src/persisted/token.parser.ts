@@ -30,6 +30,10 @@ export function getParsedJwt(): ISignedUser | undefined {
     }
 }
 
+export function getSignedUsername() {
+    return getParsedJwt()?.username || 'anonymous'
+}
+
 export function getParsedJwtOrThrow(): ISignedUser {
     const parsedToken = getParsedJwt()
 
