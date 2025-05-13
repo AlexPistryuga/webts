@@ -12,9 +12,6 @@ import {
     IconButton,
     Typography,
     Paper,
-    Radio,
-    RadioGroup,
-    FormControlLabel,
 } from '@mui/material'
 import AddIcon from '@mui/icons-material/Add'
 import './styles/DeviceManager.css'
@@ -28,18 +25,21 @@ export const DeviceManager: FC = observer(() => {
 
     const [open, setOpen] = useState(false)
     const [selectedDevice, setSelectedDevice] = useState<IDevice | null>(null)
+    const [macInput, setMacInput] = useState('')
     const [password, setPassword] = useState('')
 
     const handleClose = () => {
         setOpen(false)
         setSelectedDevice(null)
+        setMacInput('')
         setPassword('')
     }
 
-    const handleDeviceSelect = ({ target }: React.ChangeEvent<HTMLInputElement>) => {
-        const device = devicesDelta.find((d) => d.mac_addr === target.value)
-
-        device && setSelectedDevice(device)
+    const handleMacInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const mac = e.target.value
+        setMacInput(mac)
+        const device = devicesDelta.find((d) => d.mac_addr === mac)
+        setSelectedDevice(device || null)
     }
 
     const handleAddDevice = () => {
@@ -77,7 +77,21 @@ export const DeviceManager: FC = observer(() => {
                                 <Typography className='device-card__mac'>MAC: {device}</Typography>
                                 <Typography className='device-card__status'>Статус: Подключено</Typography>
                             </Box>
-                            <Button variant='contained' className='device-card__button'>
+                            <Button
+                                variant='contained'
+                                onClick={() =>
+                                    console.log(
+                                        JSON.stringify({
+                                            humidity: 49,
+                                            relay_state: true,
+                                            temperature: 22.6,
+                                            led_brightness: 512,
+                                            light_intensity: 5,
+                                        }),
+                                    )
+                                }
+                                className='device-card__button'
+                            >
                                 Открыть устройство
                             </Button>
                         </Box>
@@ -88,32 +102,30 @@ export const DeviceManager: FC = observer(() => {
             <Dialog open={open} onClose={handleClose}>
                 <DialogTitle>Добавить устройство</DialogTitle>
                 <DialogContent>
-                    <List>
-                        <RadioGroup value={selectedDevice?.mac_addr || ''} onChange={handleDeviceSelect}>
-                            {!!devicesDelta.length ? (
-                                devicesDelta.map(({ mac_addr }) => (
-                                    <ListItem key={mac_addr} className='dialog-item'>
-                                        <FormControlLabel value={mac_addr} control={<Radio />} label={mac_addr} />
-                                    </ListItem>
-                                ))
-                            ) : (
-                                <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-                                    <SearchOffOutlined />
-                                    <Typography className='device-card__status'>{'Нет доступных устройств'}</Typography>
-                                </div>
-                            )}
-                        </RadioGroup>
-                    </List>
-                    {selectedDevice && (
+                    {devicesDelta.length ? (
                         <TextField
                             fullWidth
-                            label='Пароль устройства'
-                            type='password'
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)}
+                            label='MAC адрес устройства'
+                            value={macInput}
+                            onChange={handleMacInputChange}
                             className='dialog-password'
+                            margin='dense'
                         />
+                    ) : (
+                        <Box display='flex' alignItems='center' gap={1} mt={2}>
+                            <SearchOffOutlined />
+                            <Typography className='device-card__status'>{'Нет доступных устройств'}</Typography>
+                        </Box>
                     )}
+                    <TextField
+                        fullWidth
+                        label='Пароль устройства'
+                        type='password'
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        className='dialog-password'
+                        margin='dense'
+                    />
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={handleClose}>Отмена</Button>
