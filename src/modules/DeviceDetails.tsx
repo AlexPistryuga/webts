@@ -24,7 +24,7 @@ import {
     TextField,
 } from '@mui/material'
 import { observer } from 'mobx-react-lite'
-import { useCallback, useEffect, useState, type FunctionComponent } from 'react'
+import { useCallback, useEffect, useState, type ComponentProps, type FunctionComponent } from 'react'
 import { Line } from 'react-chartjs-2'
 import {
     Chart as ChartJS,
@@ -35,9 +35,12 @@ import {
     Title,
     Tooltip,
     Legend,
+    type ChartEvent,
+    type ActiveElement,
 } from 'chart.js'
 import { formatKey } from '@/helpers/formatKet.helper'
 import { StyledFlexColumnShell } from './styled-components/MainPageStyles'
+import type { TypedChartComponent } from 'react-chartjs-2/dist/types'
 
 ChartJS.register(CategoryScale, LinearScale, LineElement, PointElement, Title, Tooltip, Legend)
 
@@ -76,7 +79,7 @@ export const DeviceDetails: FunctionComponent = observer(() => {
         setAvailableKeys(Array.from(keys))
         setDataMap(dataAccumulator)
         setTimeLabels(idAccumulator)
-    }, [])
+    }, [device_data])
 
     useEffect(() => {
         const fetchAndParse = async () => {
@@ -88,7 +91,7 @@ export const DeviceDetails: FunctionComponent = observer(() => {
         const intervalId = setInterval(fetchAndParse, 12_000)
 
         return () => clearInterval(intervalId)
-    }, [])
+    }, [fetchEspData, parseDataForCharts])
 
     const handleToggle = (key: string) => {
         setSelectedKeys((prev) => (prev.includes(key) ? prev.filter((k) => k !== key) : [...prev, key]))
@@ -103,6 +106,54 @@ export const DeviceDetails: FunctionComponent = observer(() => {
             borderColor: `hsl(${Math.floor(Math.random() * 360)}, 70%, 50%)`,
             tension: 0.3,
         })),
+    }
+
+    const handleChartClick = (_event: ChartEvent, elements: ActiveElement[], chart: ChartJS) => {
+        if (elements.length > 0 && chart) {
+            const element = elements[0]
+
+            if (!element) return
+
+            const datasetIndex = element.datasetIndex
+            const elementIndex = element.index
+
+            const clickedDatasetLabel = chart.data.datasets[datasetIndex]?.label
+
+            const clickedKey = availableKeys.find((key) => formatKey(key) === clickedDatasetLabel)
+
+            const selected = timeLabels[elementIndex]
+            if (!selected) return
+
+            const selectedId = parseInt(selected)
+            const selectedDevice = device_data.find(({ id }) => id === selectedId)
+
+            if (selectedDevice && clickedKey) {
+                const deviceData = JSON.parse(selectedDevice.data)
+
+                const filteredData = {
+                    [clickedKey]: deviceData[clickedKey],
+                }
+
+                setSelectedRow(selectedId)
+                setDialogData(filteredData)
+                setOpenDialog(true)
+            }
+        }
+    }
+
+    const chartOptions: ComponentProps<TypedChartComponent<'line'>>['options'] = {
+        responsive: true,
+        maintainAspectRatio: false,
+        onClick: handleChartClick,
+        scales: {
+            x: {
+                ticks: {
+                    autoSkip: false,
+                    maxRotation: 90,
+                    minRotation: 90,
+                },
+            },
+        },
     }
 
     return (
@@ -178,98 +229,82 @@ export const DeviceDetails: FunctionComponent = observer(() => {
             )}
 
             {tab === 'charts' && (
-                <Paper elevation={3} sx={{ p: 3, mb: 4, flexShrink: 0 }}>
-                    <Typography variant='h6' gutterBottom>
-                        Информация об устройстве
-                    </Typography>
+                <>
+                    <Paper elevation={3} sx={{ p: 3, mb: 4, flexShrink: 0 }}>
+                        <Typography variant='h6' gutterBottom>
+                            Информация об устройстве
+                        </Typography>
 
-                    <Divider sx={{ mb: 2 }} />
+                        <Divider sx={{ mb: 2 }} />
 
-                    <Box component='pre' sx={{ fontFamily: 'monospace', whiteSpace: 'pre-wrap' }}>
-                        {selectedMac}
-                    </Box>
-
-                    <FormGroup row sx={{ mb: 2, flexWrap: 'wrap' }}>
-                        {availableKeys.map((key) => (
-                            <FormControlLabel
-                                key={key}
-                                control={
-                                    <Checkbox checked={selectedKeys.includes(key)} onChange={() => handleToggle(key)} />
-                                }
-                                label={formatKey(key)}
-                            />
-                        ))}
-                    </FormGroup>
-
-                    {selectedKeys.length > 0 && (
-                        <Box sx={{ mt: 3, width: '100%', overflowX: 'auto' }}>
-                            <Typography variant='subtitle1' gutterBottom>
-                                Общий график выбранных параметров
-                            </Typography>
-                            <Box sx={{ minWidth: `${timeLabels.length * 20}px` }}>
-                                <Line
-                                    data={sharedChartData}
-                                    style={{ minHeight: 600 }}
-                                    options={{
-                                        responsive: true,
-                                        maintainAspectRatio: false,
-                                        scales: {
-                                            x: {
-                                                ticks: {
-                                                    autoSkip: false,
-                                                    maxRotation: 90,
-                                                    minRotation: 90,
-                                                },
-                                            },
-                                        },
-                                    }}
-                                />
-                            </Box>
+                        <Box component='pre' sx={{ fontFamily: 'monospace', whiteSpace: 'pre-wrap' }}>
+                            {selectedMac}
                         </Box>
-                    )}
-                </Paper>
-            )}
 
-            {tab === 'charts' && (
-                <StyledFlexColumnShell>
-                    {availableKeys.map((key) => (
-                        <div key={key}>
-                            <Paper elevation={2} sx={{ p: 3, height: '100%' }}>
-                                <Typography variant='subtitle2' gutterBottom>
-                                    {formatKey(key)}
-                                </Typography>
-                                <Box sx={{ minHeight: '250px', width: '100%', overflowX: 'auto' }}>
-                                    <div
-                                        style={{
-                                            minWidth: `${timeLabels.length * 60}px`,
-                                            display: 'flex',
-                                            flexDirection: 'row',
-                                        }}
-                                    >
-                                        <Line
-                                            data={{
-                                                labels: timeLabels,
-                                                datasets: [
-                                                    {
-                                                        label: formatKey(key),
-                                                        data: dataMap[key] || [],
-                                                        fill: false,
-                                                        borderColor: `hsl(${Math.floor(Math.random() * 360)}, 70%, 50%)`,
-                                                        tension: 0.3,
-                                                    },
-                                                ],
-                                            }}
-                                            options={{
-                                                maintainAspectRatio: false,
-                                                responsive: true,
-                                            }}
+                        <FormGroup row sx={{ mb: 2, flexWrap: 'wrap' }}>
+                            {availableKeys.map((key) => (
+                                <FormControlLabel
+                                    key={key}
+                                    control={
+                                        <Checkbox
+                                            checked={selectedKeys.includes(key)}
+                                            onChange={() => handleToggle(key)}
                                         />
-                                    </div>
+                                    }
+                                    label={formatKey(key)}
+                                />
+                            ))}
+                        </FormGroup>
+
+                        {selectedKeys.length > 0 && (
+                            <Box sx={{ mt: 3, width: '100%', overflowX: 'auto' }}>
+                                <Typography variant='subtitle1' gutterBottom>
+                                    Общий график выбранных параметров
+                                </Typography>
+                                <Box sx={{ minWidth: `${timeLabels.length * 20}px` }}>
+                                    <Line data={sharedChartData} style={{ minHeight: 600 }} options={chartOptions} />
                                 </Box>
-                            </Paper>
-                        </div>
-                    ))}
-                </StyledFlexColumnShell>
+                            </Box>
+                        )}
+                    </Paper>
+
+                    <StyledFlexColumnShell>
+                        {availableKeys.map((key) => (
+                            <div key={key}>
+                                <Paper elevation={2} sx={{ p: 3, height: '100%' }}>
+                                    <Typography variant='subtitle2' gutterBottom>
+                                        {formatKey(key)}
+                                    </Typography>
+                                    <Box sx={{ minHeight: '250px', width: '100%', overflowX: 'auto' }}>
+                                        <div
+                                            style={{
+                                                minWidth: `${timeLabels.length * 60}px`,
+                                                display: 'flex',
+                                                flexDirection: 'row',
+                                            }}
+                                        >
+                                            <Line
+                                                data={{
+                                                    labels: timeLabels,
+                                                    datasets: [
+                                                        {
+                                                            label: formatKey(key),
+                                                            data: dataMap[key] || [],
+                                                            fill: false,
+                                                            borderColor: `hsl(${Math.floor(Math.random() * 360)}, 70%, 50%)`,
+                                                            tension: 0.3,
+                                                        },
+                                                    ],
+                                                }}
+                                                options={chartOptions}
+                                            />
+                                        </div>
+                                    </Box>
+                                </Paper>
+                            </div>
+                        ))}
+                    </StyledFlexColumnShell>
+                </>
             )}
 
             <Dialog open={openDialog} onClose={() => setOpenDialog(false)} maxWidth='sm' fullWidth>
@@ -324,28 +359,28 @@ export const DeviceDetails: FunctionComponent = observer(() => {
 
                             const parsedData: Record<string, any> = {}
 
-                            for (const key in dialogData) {
-                                const value = dialogData[key]
-                                let originalValue = device_data.find((device) => device.id === selectedRow)?.data
+                            const originalData = device_data.find((device) => device.id === selectedRow)?.data
+                            const parsedOriginalData = originalData ? JSON.parse(originalData) : {}
 
-                                if (originalValue) originalValue = JSON.parse(originalValue)[key]
+                            for (const key in parsedOriginalData) {
+                                const originalValue = parsedOriginalData[key]
+                                const dialogValue = dialogData[key]
 
-                                if (originalValue !== undefined) {
+                                if (dialogValue !== undefined) {
                                     const originalType = typeof originalValue
-
                                     if (originalType === 'number') {
-                                        const numValue = parseFloat(value as string)
+                                        const numValue = parseFloat(dialogValue as string)
 
                                         if (!isNaN(numValue)) parsedData[key] = numValue
                                         else {
-                                            alert(`Значение ${value} для строки ${key} не соотвествует типам`)
+                                            alert(`Значение ${dialogValue} для строки ${key} не соответствует типам`)
                                             parsedData[key] = originalValue
                                         }
                                     } else {
-                                        parsedData[key] = value
+                                        parsedData[key] = dialogValue
                                     }
                                 } else {
-                                    parsedData[key] = value
+                                    parsedData[key] = originalValue
                                 }
                             }
 
