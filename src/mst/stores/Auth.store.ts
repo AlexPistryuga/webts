@@ -2,7 +2,7 @@ import { fetchEspDevices } from '@/graphql/queries/fetchEspDevices.query'
 import { fetchUserEspDevices } from '@/graphql/queries/fetchUserEspDevices.query'
 import { cleanStringFields } from '@/helpers/trim.helper'
 import { TokenStorage } from '@/persisted/token.storage'
-import { authService } from '@/services/auth.service'
+import { backendService } from '@/services/backend.service'
 import { processServerError } from '@/services/axios.error'
 import { applySnapshot, flow, toGenerator, types } from 'mobx-state-tree'
 import { Device } from '../models/Device.model'
@@ -36,9 +36,9 @@ export const Auth$ = types
             applySnapshot(self, { is_authenticated: false })
         },
 
-        login: flow(function* (loginData: Parameters<typeof authService.login>[0]) {
+        login: flow(function* (loginData: Parameters<typeof backendService.login>[0]) {
             try {
-                const { token } = yield* toGenerator(authService.login(cleanStringFields(loginData)))
+                const { token } = yield* toGenerator(backendService.login(cleanStringFields(loginData)))
 
                 self.is_authenticated = true
 
@@ -48,9 +48,9 @@ export const Auth$ = types
             }
         }),
 
-        register: flow(function* (registerData: Parameters<typeof authService.register>[0]) {
+        register: flow(function* (registerData: Parameters<typeof backendService.register>[0]) {
             try {
-                const { username } = yield* toGenerator(authService.register(cleanStringFields(registerData)))
+                const { username } = yield* toGenerator(backendService.register(cleanStringFields(registerData)))
 
                 console.log('Registered user:', username)
             } catch (e) {
@@ -139,6 +139,14 @@ export const Auth$ = types
                 const index = data.findIndex(({ id }) => id === payload.id)
 
                 if (index !== -1) data[index]!.data = returning.data
+            } catch (e) {
+                processServerError(e)
+            }
+        }),
+
+        updateEspStatus: flow(function* (params: Parameters<typeof backendService.updateEspState>[0]) {
+            try {
+                yield* toGenerator(backendService.updateEspState(params))
             } catch (e) {
                 processServerError(e)
             }

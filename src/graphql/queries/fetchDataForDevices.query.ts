@@ -22,7 +22,7 @@ export async function fetchDataForDevices(macs: VariablesOf<typeof EspDataQuery>
 
     if (!data?.esp_data.length) return {}
 
-    const groupedByMac: Record<IDevice['mac_addr'], typeof data.esp_data> = {}
+    const groupedByMac: Record<IDevice['mac_addr'], ResultOfFetchDataForDevices> = {}
 
     for (const esp of data.esp_data) {
         const entry = {

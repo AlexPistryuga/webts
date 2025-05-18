@@ -1,4 +1,4 @@
-import { isComposerPath, useParamMac } from '@/helpers/url.helper'
+import { isComposerPath } from '@/helpers/url.helper'
 import { useAuth$ } from '@/mst/provider'
 import {
     Box,
@@ -22,15 +22,19 @@ import {
     DialogActions,
     Button,
     TextField,
+    Slider,
+    Switch,
+    Tooltip,
 } from '@mui/material'
 import { observer } from 'mobx-react-lite'
-import { useEffect, useState, type ComponentProps, type FunctionComponent } from 'react'
+import { Fragment, useEffect, useState, type ComponentProps, type FunctionComponent } from 'react'
 import { Line } from 'react-chartjs-2'
 import { Chart as ChartJS, type ChartEvent, type ActiveElement } from 'chart.js'
 import { formatKey, getCurrentSelection } from '@/helpers/formatKet.helper'
 import { StyledFlexColumnShell } from './styled-components/MainPageStyles'
 import type { TypedChartComponent } from 'react-chartjs-2/dist/types'
 import type { ITab } from '@/mst/types'
+import type { ResultOfFetchDataForDevices } from '@/graphql/queries/fetchDataForDevices.query'
 
 export const DeviceDetails: FunctionComponent<{ selectedMac: string }> = observer(({ selectedMac }) => {
     const [selectedKeys, setSelectedKeys] = useState<string[]>(getCurrentSelection(selectedMac))
@@ -44,12 +48,14 @@ export const DeviceDetails: FunctionComponent<{ selectedMac: string }> = observe
 
     const { devices_data, fetchDataForDevices, updateEspDataRecord } = useAuth$()
 
+    const data = devices_data.get(selectedMac)
+
     const parseDataForCharts = () => {
         const keys = new Set<string>()
         const dataAccumulator: Record<string, number[]> = {}
         const idAccumulator: string[] = []
 
-        devices_data.get(selectedMac)?.forEach(({ data, id }) => {
+        data?.forEach(({ data, id }) => {
             const parsed = JSON.parse(data)
             idAccumulator.push(id.toString())
 
@@ -77,7 +83,7 @@ export const DeviceDetails: FunctionComponent<{ selectedMac: string }> = observe
         const intervalId = setInterval(fetchAndParse, 12_000)
 
         return () => clearInterval(intervalId)
-    }, [])
+    }, [data])
 
     const handleToggle = (key: string) => {
         setSelectedKeys((prev) => {
@@ -130,7 +136,7 @@ export const DeviceDetails: FunctionComponent<{ selectedMac: string }> = observe
             if (!selected) return
 
             const selectedId = parseInt(selected)
-            const selectedDevice = devices_data.get(selectedMac)?.find(({ id }) => id === selectedId)
+            const selectedDevice = data?.find(({ id }) => id === selectedId)
 
             if (selectedDevice && clickedKey) {
                 const deviceData = JSON.parse(selectedDevice.data)
@@ -174,24 +180,28 @@ export const DeviceDetails: FunctionComponent<{ selectedMac: string }> = observe
                 overflow: 'hidden',
             }}
         >
-            <Tabs
-                value={tab}
-                onChange={(_, tab) => {
-                    localStorage.setItem('tab', tab)
-                    setTab(tab)
-                }}
-                sx={{
-                    mb: 3,
-                    '& .MuiTabs-indicator': { height: '3px' },
-                    '& .MuiTab-root': {
-                        outline: 'none',
-                        '&:focus': { outline: 'none' },
-                    },
-                }}
-            >
-                <Tab value='table' label='Таблицы' />
-                <Tab value='charts' label='Графики' />
-            </Tabs>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <Tabs
+                    value={tab}
+                    onChange={(_, tab) => {
+                        localStorage.setItem('tab', tab)
+                        setTab(tab)
+                    }}
+                    sx={{
+                        mb: 3,
+                        '& .MuiTabs-indicator': { height: '3px' },
+                        '& .MuiTab-root': {
+                            outline: 'none',
+                            '&:focus': { outline: 'none' },
+                        },
+                    }}
+                >
+                    <Tab value='table' label='Таблицы' />
+                    <Tab value='charts' label='Графики' />
+                </Tabs>
+
+                {data && <EspStatusConfigurator data={data} mac={selectedMac} />}
+            </div>
 
             {tab === 'table' && (
                 <Paper elevation={3} sx={{ p: 3 }}>
@@ -211,7 +221,7 @@ export const DeviceDetails: FunctionComponent<{ selectedMac: string }> = observe
                                 </TableRow>
                             </TableHead>
                             <TableBody>
-                                {devices_data.get(selectedMac)?.map(({ id, data }) => {
+                                {data?.map(({ id, data }) => {
                                     const parsed = JSON.parse(data)
 
                                     return (
@@ -283,7 +293,11 @@ export const DeviceDetails: FunctionComponent<{ selectedMac: string }> = observe
                                     Общий график выбранных параметров
                                 </Typography>
                                 <Box sx={{ minWidth: `${timeLabels.length * 20}px` }}>
-                                    <Line data={sharedChartData} style={{ minHeight: isComposer ? 560 : 600 }} options={chartOptions} />
+                                    <Line
+                                        data={sharedChartData}
+                                        style={{ minHeight: isComposer ? 560 : 600 }}
+                                        options={chartOptions}
+                                    />
                                 </Box>
                             </Box>
                         )}
@@ -381,9 +395,7 @@ export const DeviceDetails: FunctionComponent<{ selectedMac: string }> = observe
 
                             const parsedData: Record<string, any> = {}
 
-                            const originalData = devices_data
-                                .get(selectedMac)
-                                ?.find(({ id }) => id === selectedRow)?.data
+                            const originalData = data?.find(({ id }) => id === selectedRow)?.data
 
                             const parsedOriginalData = originalData ? JSON.parse(originalData) : {}
 
@@ -441,3 +453,71 @@ export const DeviceDetails: FunctionComponent<{ selectedMac: string }> = observe
         </Box>
     )
 })
+
+const EspStatusConfigurator: FunctionComponent<{ data: ResultOfFetchDataForDevices; mac: string }> = observer(
+    ({ data, mac }) => {
+        const parsed = JSON.parse((data[data.length - 1]?.data as string) || '')
+
+        const [isRelayEnabled, setIsRelayEnabled] = useState<boolean>(parsed.relay_state || false)
+        const [brightness, setBrightness] = useState<number>(parsed.led_brightness || 0)
+
+        const { updateEspStatus } = useAuth$()
+
+        return (
+            <Fragment>
+                <FormControlLabel
+                    sx={{ mb: 3 }}
+                    control={
+                        <Tooltip title={'Relay state'}>
+                            <Switch
+                                checked={isRelayEnabled}
+                                onChange={(e) => {
+                                    const next = e.target.checked
+                                    setIsRelayEnabled(next)
+
+                                    updateEspStatus({
+                                        mac,
+                                        relay_state: next,
+                                        led_brightness: brightness.toString(),
+                                    })
+                                }}
+                                color={'primary'}
+                            />
+                        </Tooltip>
+                    }
+                    label={null}
+                />
+
+                <div
+                    style={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        gap: '4px',
+                        marginBottom: '24px',
+                    }}
+                >
+                    <Tooltip title='Led brightness'>
+                        <Slider
+                            value={brightness}
+                            onChange={(_, newValue) => setBrightness(newValue as number)}
+                            onChangeCommitted={() => {
+                                updateEspStatus({
+                                    mac,
+                                    relay_state: isRelayEnabled,
+                                    led_brightness: brightness.toString(),
+                                })
+                            }}
+                            min={0}
+                            max={1000}
+                            step={1}
+                            sx={{ width: 200 }}
+                            valueLabelDisplay='auto'
+                            valueLabelFormat={(value) => `${value}%`}
+                        />
+                    </Tooltip>
+                </div>
+            </Fragment>
+        )
+    },
+)
