@@ -1,3 +1,5 @@
+import type { IDevice } from '@/mst/types'
+
 export function formatKey(key: string): string {
     return key
         .split('_')
@@ -8,4 +10,12 @@ export function formatKey(key: string): string {
             return word.toLowerCase()
         })
         .join(' ')
+}
+
+export function getCurrentSelection(mac: IDevice['mac_addr']) {
+    const selection = localStorage.getItem(`selection_${mac}`)
+
+    if (!selection?.length) return []
+
+    return selection.split(',')
 }

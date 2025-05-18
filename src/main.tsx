@@ -2,10 +2,23 @@ import React from 'react'
 import ReactDOM from 'react-dom/client'
 import { CssBaseline, ThemeProvider, createTheme } from '@mui/material'
 
+import {
+    Chart as ChartJS,
+    CategoryScale,
+    LinearScale,
+    LineElement,
+    PointElement,
+    Title,
+    Tooltip,
+    Legend,
+} from 'chart.js'
+
 import './index.css'
 import { auth$, Auth$Provider } from './mst/provider'
 import { BrowserRouter } from 'react-router-dom'
 import RoutesManager from './RoutesManager'
+
+ChartJS.register(CategoryScale, LinearScale, LineElement, PointElement, Title, Tooltip, Legend)
 
 const theme = createTheme({
     palette: {

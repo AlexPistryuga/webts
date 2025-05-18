@@ -4,3 +4,5 @@ import type { Device } from './models/Device.model'
 
 export interface IAuth$ extends Instance<typeof Auth$> {}
 export interface IDevice extends Instance<typeof Device> {}
+
+export type ITab = 'charts' | 'table'

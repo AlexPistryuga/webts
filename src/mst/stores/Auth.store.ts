@@ -8,11 +8,11 @@ import { applySnapshot, flow, toGenerator, types } from 'mobx-state-tree'
 import { Device } from '../models/Device.model'
 import type { IDevice } from '../types'
 import { insertEspUserDevice } from '@/graphql/mutation/insertEspUserDevice.mutation'
-import { fetchEspData } from '@/graphql/queries/fetchEspData.query'
+import { fetchDataForDevices, type ResultOfFetchDataForDevices } from '@/graphql/queries/fetchDataForDevices.query'
 import { EspData } from '../models/EspData.model'
-import { getSelectedMacFromPath } from '@/helpers/url.helper'
-import { auth$ } from '../provider'
+import { decodeSelectedMacsFromPath, getSelectedMacFromPath, isComposerPath } from '@/helpers/url.helper'
 import { updateEspDataRecord } from '@/graphql/mutation/updateEspDataRecord.mutation'
+import { deleteEspUserDevice } from '@/graphql/mutation/deleteEspUserDevice.mutation'
 
 export const Auth$ = types
     .model('AuthStore', {
@@ -21,7 +21,7 @@ export const Auth$ = types
         esp_devices: types.optional(types.array(Device), []),
         user_devices: types.optional(types.array(types.string), []),
 
-        device_data: types.optional(types.array(EspData), []),
+        devices_data: types.optional(types.map(types.array(EspData)), {}),
     })
     .volatile(() => ({ isFetching: false }))
     .views((self) => ({
@@ -78,17 +78,25 @@ export const Auth$ = types
             }
         }),
 
-        fetchEspData: flow(function* () {
-            const selected_mac = getSelectedMacFromPath()
+        fetchDataForDevices: flow(function* () {
+            let boundMacs: string[] = []
 
-            if (!selected_mac) return
+            if (isComposerPath()) {
+                boundMacs = decodeSelectedMacsFromPath()
+            } else {
+                const selectedMac = getSelectedMacFromPath()
+
+                if (!selectedMac) return
+
+                boundMacs = [selectedMac]
+            }
 
             self.isFetching = true
 
             try {
-                const esp_data = yield* toGenerator(fetchEspData(selected_mac))
+                const data_records = yield* toGenerator(fetchDataForDevices(boundMacs))
 
-                self.device_data.replace(esp_data)
+                self.devices_data.replace(data_records)
             } catch (e) {
                 processServerError(e)
             } finally {
@@ -106,15 +114,31 @@ export const Auth$ = types
             }
         }),
 
-        updateEspDataRecord: flow(function* (params: Parameters<typeof updateEspDataRecord>[0]) {
+        deleteEspUserDevice: flow(function* (mac_addr: IDevice['mac_addr']) {
             try {
-                const returning = yield* toGenerator(updateEspDataRecord(params))
+                const deleted = yield* toGenerator(deleteEspUserDevice(mac_addr))
+
+                deleted && self.user_devices.remove(deleted)
+            } catch (e) {
+                processServerError(e)
+            }
+        }),
+
+        updateEspDataRecord: flow(function* (params: ResultOfFetchDataForDevices[number]) {
+            try {
+                const { mac_addr, ...payload } = params
+
+                const returning = yield* toGenerator(updateEspDataRecord(payload))
 
                 if (!returning) return
 
-                const index = self.device_data.findIndex(({ id }) => id === params.id)
+                const data = self.devices_data.get(mac_addr)
 
-                if (index !== -1) self.device_data[index]!.data = returning.data
+                if (!data) return
+
+                const index = data.findIndex(({ id }) => id === payload.id)
+
+                if (index !== -1) data[index]!.data = returning.data
             } catch (e) {
                 processServerError(e)
             }
@@ -122,7 +146,7 @@ export const Auth$ = types
     }))
     .actions((self) => ({
         clearDeviceData() {
-            self.device_data.clear()
+            self.devices_data.clear()
         },
 
         updateField<Key extends keyof typeof self>(field: Key, value: (typeof self)[Key]) {

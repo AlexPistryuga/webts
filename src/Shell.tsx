@@ -11,13 +11,12 @@ import {
 import { Avatar, Typography } from '@mui/material'
 import { ChevronLeftOutlined, LogoutOutlined } from '@mui/icons-material'
 import { getSignedUsername } from './persisted/token.parser'
-import { useNavigate } from 'react-router-dom'
-import { useParamMac } from './helpers/url.helper'
+import { useLocation, useNavigate } from 'react-router-dom'
 
 export default observer(function ({ children }) {
     const { fetchUserEspDevices, logout } = useAuth$()
-    const { selectedMac } = useParamMac()
 
+    const location = useLocation()
     const navigate = useNavigate()
 
     useEffect(() => {
@@ -27,7 +26,7 @@ export default observer(function ({ children }) {
     return (
         <PageWrapper>
             <NavBar>
-                {selectedMac && (
+                {location.pathname !== '/devices' && (
                     <NavIconOutlined variant={'button'} onClick={() => navigate('/devices', { replace: true })}>
                         <ChevronLeftOutlined />
                         <span style={{ whiteSpace: 'nowrap' }}>К устройствам</span>

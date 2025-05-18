@@ -33,3 +33,24 @@ export function useParamMac() {
 
     return { selectedMac }
 }
+
+export function decodeSelectedMacsFromPath(): string[] {
+    const searchParams = new URLSearchParams(window.location.search)
+
+    const macsParam = searchParams.get('macs')
+
+    if (!macsParam) return []
+
+    const macs: string[] = []
+
+    const decodedParam = decodeURIComponent(macsParam).split(',')
+
+    for (const mac of decodedParam) {
+        const trimmedMac = mac.trim()
+        isInstanceOfMac(trimmedMac) && macs.push(trimmedMac)
+    }
+
+    return macs
+}
+
+export const isComposerPath = () => window.location.pathname.startsWith('/devices/compare')

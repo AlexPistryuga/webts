@@ -6,12 +6,16 @@ import { LoginPage } from './modules/LoginPage'
 import { MainPage } from './modules/MainPage'
 import { useAuth$ } from './mst/provider'
 import { observer } from 'mobx-react-lite'
-import { type FunctionComponent } from 'react'
-import { DeviceDetails } from './modules/DeviceDetails'
+import { Suspense, type FunctionComponent } from 'react'
+import { DeviceDetails } from './modules/DeviceDetails2'
 import Shell from './Shell'
+import { DevicesComparator } from './modules/DevicesComparator'
+import { useParamMac } from './helpers/url.helper'
 
 export default observer(() => {
     const { is_authenticated } = useAuth$()
+
+    const { selectedMac } = useParamMac()
 
     if (!is_authenticated) {
         return (
@@ -27,7 +31,11 @@ export default observer(() => {
         <Shell>
             <Routes>
                 <Route path={'/devices'} element={<MainPage />} />
-                <Route path={'/devices/:mac'} element={<DeviceDetails />} />
+                <Route
+                    path={'/devices/:mac'}
+                    element={selectedMac ? <DeviceDetails selectedMac={selectedMac} /> : null}
+                />
+                <Route path={'/devices/compare'} element={<DevicesComparator />} />
 
                 <Route path={'/*'} element={<Navigate to={'/devices'} />} />
             </Routes>
