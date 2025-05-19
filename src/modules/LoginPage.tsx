@@ -42,7 +42,7 @@ export const LoginPage: FC = observer(() => {
                 height: '100vh',
             }}
         >
-            <StyledPaper elevation={3}>
+            <StyledPaper elevation={3} sx={{ maxWidth: 600, width: '100%' }}>
                 <Box sx={styles.tabs}>
                     <Tabs value={tabValue} onChange={(_, tab) => setTabValue(tab)} centered>
                         <Tab label='Вход' />
